@@ -1,0 +1,44 @@
+import java.io.IOException;
+import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+
+public class WeatherData {
+
+  public static class WeatherDataMapper extends Mapper<Object, Text, Text, DoubleWritable> {
+
+    private Text keyOut = new Text();
+    private DoubleWritable valueOut = new DoubleWritable();
+
+    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+      String line = value.toString();
+      String stationID = line.substring(0, 11);
+      String date = line.substring(11, 19);
+      String element = line.substring(19, 21);
+      if (element.equals("TMAX") || element.equals("TMIN") || element.equals("DPTP") || element.equals("WDFG")) {
+        double value = Double.parseDouble(line.substring(21, 26));
+        keyOut.set(element);
+        valueOut.set(value);
+        context.write(keyOut, valueOut);
+      }
+    }
+  }
+
+  public static class WeatherDataReducer extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+
+    private DoubleWritable result = new DoubleWritable();
+
+    public void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
+      double sum = 0;
+      int count = 0;
+      for (DoubleWritable val : values) {
+        sum += val.get();
+        count++;
+      }
+      double avg = sum / count;
+      result.set(avg);
+      context.write(key, result);
+    }
+  }
+}

@@ -1,0 +1,17 @@
+/*Simple Scala Program to check String is Palidrome or Not*/
+
+
+def palindromeCheck(st:String):Boolean = {
+return (st == st.reverse)
+}
+println(palindromeCheck("abccba"))
+println(palindromeCheck("hello"))
+
+
+
+Output:
+scala> :load pali.scala
+Loading pali.scala...
+palindromeCheck: (st: String)Boolean
+true
+false
